@@ -1,38 +1,31 @@
 import json
 import random
+import sys
 
-def get_aws_pipeline_metrics():
+def get_aws_pipeline_metrics(pipeline_name):
+    base_cost = random.uniform(50, 200)
+
     return {
-        "pipeline_name": "daily_etl",
+        "pipeline_name": pipeline_name,
         "services": {
             "glue": {
-                "runs_per_day": 24,
-                "avg_duration_minutes": random.randint(10, 20),
-                "cost_usd": round(random.uniform(30, 60), 2)
+                "runs_per_day": random.choice([6, 12, 24]),
+                "avg_duration_minutes": random.randint(10, 30),
+                "cost_usd": round(base_cost * 0.4, 2)
             },
             "athena": {
-                "queries_per_day": 50,
-                "data_scanned_gb": random.randint(200, 500),
-                "cost_usd": round(random.uniform(20, 80), 2)
+                "queries_per_day": random.randint(10, 100),
+                "data_scanned_gb": random.randint(100, 1000),
+                "cost_usd": round(base_cost * 0.4, 2)
             },
             "s3": {
-                "storage_gb": random.randint(500, 2000),
-                "monthly_cost_usd": round(random.uniform(10, 40), 2)
+                "storage_gb": random.randint(100, 5000),
+                "monthly_cost_usd": round(base_cost * 0.2, 2)
             }
-        },
-        "estimated_total_cost": 0
+        }
     }
 
-def calculate_total(data):
-    total = (
-        data["services"]["glue"]["cost_usd"] +
-        data["services"]["athena"]["cost_usd"] +
-        data["services"]["s3"]["monthly_cost_usd"]
-    )
-    data["estimated_total_cost"] = round(total, 2)
-    return data
-
 if __name__ == "__main__":
-    data = get_aws_pipeline_metrics()
-    data = calculate_total(data)
-    print(json.dumps(data))
+    pipeline_name = sys.argv[1] if len(sys.argv) > 1 else "default_pipeline"
+    result = get_aws_pipeline_metrics(pipeline_name)
+    print(json.dumps(result))
